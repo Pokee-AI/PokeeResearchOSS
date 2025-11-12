@@ -1,0 +1,25 @@
+{
+  "name": "wazir-ahmed-garage-website",
+  "version": "1.0.0",
+  "description": "Website for Wazir Ahmed International L.L.C - Used Car Spare Parts in Muscat, Oman",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 8080 -o",
+    "dev": "npx live-server --port=8080 --open=/website"
+  },
+  "keywords": [
+    "car parts",
+    "spare parts",
+    "used car parts",
+    "Muscat",
+    "Oman",
+    "garage",
+    "auto parts"
+  ],
+  "author": "Wazir Ahmed International L.L.C",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "live-server": "^1.2.2"
+  }
+}

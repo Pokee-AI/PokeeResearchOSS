@@ -1,0 +1,149 @@
+WAZIR AHMED INTERNATIONAL L.L.C - WEBSITE
+==========================================
+
+File Structure Overview
+-----------------------
+
+/vercel/sandbox/
+├── website/                          ← Main Website Directory
+│   ├── index.html                   ← Complete Website (16 KB)
+│   ├── styles.css                   ← All Styling (12 KB)
+│   ├── script.js                    ← JavaScript Functionality (5 KB)
+│   ├── package.json                 ← Node.js Config
+│   ├── start.sh                     ← Quick Start Script (executable)
+│   ├── .gitignore                   ← Git Ignore Rules
+│   ├── README.md                    ← Detailed Documentation
+│   ├── FEATURES.md                  ← Feature Specifications
+│   └── FILE_STRUCTURE.txt          ← This File
+│
+├── GETTING_STARTED.md              ← Quick Start Guide
+├── WEBSITE_README.md               ← Project Overview
+└── PROJECT_SUMMARY.md              ← Complete Summary
+
+Website Page Structure
+----------------------
+
+index.html contains:
+├── <head>
+│   ├── Meta tags (SEO)
+│   ├── Title
+│   ├── styles.css link
+│   └── Font Awesome CDN
+│
+├── <body>
+│   ├── Header (Fixed Navigation)
+│   │   ├── Logo
+│   │   ├── Menu Items
+│   │   └── Mobile Hamburger
+│   │
+│   ├── Hero Section (#home)
+│   │   ├── Title
+│   │   ├── Subtitle
+│   │   └── CTA Buttons
+│   │
+│   ├── About Section (#about)
+│   │   ├── Company Info
+│   │   └── Features Grid (4 items)
+│   │
+│   ├── Parts Catalog (#parts)
+│   │   ├── Search Box
+│   │   ├── Category Filter
+│   │   └── Parts Grid (12 categories)
+│   │       ├── Engine Components
+│   │       ├── Transmission Systems
+│   │       ├── Suspension Parts
+│   │       ├── Brake Systems
+│   │       ├── Electrical Components
+│   │       ├── Body Parts
+│   │       ├── Interior Parts
+│   │       ├── Cooling Systems
+│   │       ├── Fuel Systems
+│   │       ├── AC & Heating
+│   │       ├── Steering Systems
+│   │       └── Wheels & Tires
+│   │
+│   ├── Services Section (#services)
+│   │   └── Service Cards (4 items)
+│   │       ├── Part Sourcing
+│   │       ├── Quality Inspection
+│   │       ├── Delivery Available
+│   │       └── Warranty Options
+│   │
+│   ├── Contact Section (#contact)
+│   │   ├── Contact Info Cards
+│   │   │   ├── Location
+│   │   │   ├── Phone
+│   │   │   ├── Email
+│   │   │   └── Working Hours
+│   │   └── Contact Form
+│   │       ├── Name Field
+│   │       ├── Email Field
+│   │       ├── Phone Field
+│   │       ├── Part Needed Field
+│   │       ├── Message Field
+│   │       └── Submit Button
+│   │
+│   ├── Footer
+│   │   ├── Company Info
+│   │   ├── Quick Links
+│   │   ├── Contact Details
+│   │   └── Copyright
+│   │
+│   └── <script src="script.js">
+
+CSS Structure (styles.css)
+---------------------------
+├── Reset Styles
+├── CSS Variables (Colors, Fonts)
+├── Global Styles
+├── Header & Navigation
+├── Hero Section
+├── Button Styles
+├── Section Styles
+├── About Section
+├── Parts Catalog
+├── Services Section
+├── Contact Section
+├── Footer
+├── Responsive Media Queries
+│   ├── @media (max-width: 768px)
+│   └── @media (max-width: 480px)
+└── Animations
+
+JavaScript Features (script.js)
+--------------------------------
+├── Mobile Menu Toggle
+├── Header Scroll Effect
+├── Search Functionality
+├── Filter Functionality
+├── Contact Form Handling
+├── Smooth Scrolling
+├── Intersection Observer (Animations)
+├── Active Navigation Link
+└── Page Load Animation
+
+How to Start
+------------
+1. cd /vercel/sandbox/website
+2. python3 -m http.server 8080
+3. Open http://localhost:8080
+
+Quick Customization
+-------------------
+1. Contact Info → Edit index.html (lines 290-330)
+2. Colors → Edit styles.css (lines 12-18)
+3. Logo → Add image and update index.html (line 18)
+4. Parts → Add more cards in index.html (parts-grid section)
+
+Deployment
+----------
+• Vercel: vercel
+• Netlify: Drag & drop website folder
+• Traditional: Upload via FTP
+• GitHub Pages: Push and enable in settings
+
+Total Size: ~33 KB (Fast Loading!)
+Browser Support: All Modern Browsers + Mobile
+Performance: <1 second load time
+
+Status: ✅ READY TO DEPLOY

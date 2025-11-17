@@ -17,6 +17,7 @@ import asyncio
 import json
 import os
 from typing import Any, Dict, List
+import urllib.parse
 
 import aiohttp
 from dotenv import load_dotenv
@@ -144,6 +145,11 @@ async def serper_search(query: str, timeout: int = 30, top_k: int = 10) -> Searc
                     data = await response.json()
                     raw_response = await response.text()
                     url_items = _extract_organic_from_serper_response(data)
+                    url_items = sorted(
+                        url_items,
+                        key=lambda item: boost_score(item.url),
+                        reverse=True,
+                    )
 
                     logger.info(
                         f"Search successful for '{query}', found {len(url_items)} results"
@@ -313,3 +319,110 @@ class WebSearchAgent:
                 },
                 error=f"WebSearchAgent error: {str(e)[:200]}",
             )
+ACADEMIC_WEIGHTS = {
+    "wikipedia.org": 100,
+    "semanticscholar.org": 98,
+    "doi.org": 97,
+    "arxiv.org": 95,
+    "ncbi.nlm.nih.gov": 95,
+    "jstor.org": 94,
+    "dblp.org": 93,
+    "scholar.google.com": 100,
+}
+
+GOV_WEIGHTS = {
+    "nih.gov": 95,
+    "cdc.gov": 94,
+    "nasa.gov": 94,
+    "who.int": 93,
+    "un.org": 92,
+    "europa.eu": 91,
+}
+
+TECH_WEIGHTS = {
+    "w3.org": 90,
+    "ietf.org": 89,
+    "readthedocs.io": 89,
+    "developer.mozilla.org": 88,
+    "docs.python.org": 87,
+    "learn.microsoft.com": 86,
+    "unicode.org": 85,
+    "postgresql.org": 85,
+}
+
+OSS_WEIGHTS = {
+    "github.com": 84,
+    "gitlab.com": 83,
+    "apache.org": 82,
+    "python.org": 81,
+    "rust-lang.org": 81,
+    "linuxfoundation.org": 80,
+}
+
+COMMUNITY_WEIGHTS = {
+    "stackoverflow.com": 84,
+    "pypi.org": 83,
+    "npmjs.com": 82,
+    "crates.io": 81,
+}
+
+ALL_WEIGHTS = {
+    **ACADEMIC_WEIGHTS,
+    **GOV_WEIGHTS,
+    **TECH_WEIGHTS,
+    **OSS_WEIGHTS,
+    **COMMUNITY_WEIGHTS,
+}
+
+NEWS_DOMAINS = (
+    "reuters.com",
+    "apnews.com",
+    "pewresearch.org",
+    "nytimes.com",
+    "theguardian.com",
+    "npr.org",
+    "pbs.org",
+)
+
+TECH_ORG_TOKENS = (
+    "kernel",
+    "linux",
+    "python",
+    "apache",
+    "mozilla",
+    "gnome",
+    "kde",
+)
+
+def boost_score(url: str) -> int:
+    try:
+        host = urllib.parse.urlparse(url).netloc.lower().split(":", 1)[0]
+        if not host:
+            return 0
+    except Exception:
+        return 0
+
+    for domain, weight in ALL_WEIGHTS.items():
+        if host == domain or host.endswith("." + domain):
+            return weight
+
+    if host.endswith(".edu") or host.endswith(".gov"):
+        return 88
+    if host.endswith(".mil") or host.endswith(".int"):
+        return 85
+    if host.endswith(".ac.uk") or host.endswith(".edu.au"):
+        return 87
+
+    for domain in NEWS_DOMAINS:
+        if host == domain or host.endswith("." + domain):
+            return 72
+
+    if host.endswith(".org") and host.count(".") >= 1:
+        if any(token in host for token in TECH_ORG_TOKENS):
+            return 65
+        return 50
+
+    if host.endswith(".io") and "github" not in host:
+        return 55
+
+    return 0

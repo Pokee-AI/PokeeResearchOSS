@@ -145,11 +145,14 @@ async def serper_search(query: str, timeout: int = 30, top_k: int = 10) -> Searc
                     data = await response.json()
                     raw_response = await response.text()
                     url_items = _extract_organic_from_serper_response(data)
-                    url_items = sorted(
-                        url_items,
-                        key=lambda item: boost_score(item.url),
-                        reverse=True,
-                    )
+                    scored_items = [
+                        (boost_score(item.url), item) for item in url_items
+                    ]
+                    filtered = [pair for pair in scored_items if pair[0] > 0]
+                    scored_items = filtered if filtered else scored_items[:3]
+                    url_items = [
+                        item for _, item in sorted(scored_items, key=lambda pair: pair[0], reverse=True)
+                    ]
 
                     logger.info(
                         f"Search successful for '{query}', found {len(url_items)} results"

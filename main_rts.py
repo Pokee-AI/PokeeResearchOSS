@@ -349,8 +349,22 @@ def main_task(config):
         else:
             assert False, "gemini_mbe_final_answer not found for data source: " + data_source
     
+    # NEW CODE: Enhanced metrics for data sources
     for data_source, gemini_mbe_list in data_source_to_gemini_mbe.items():
-        print(f"Average gemini_mbe for {data_source}: {np.mean(gemini_mbe_list)} (n={len(gemini_mbe_list)})")
+        avg_score = np.mean(gemini_mbe_list)
+
+        # --- Metric 21 (Success Rate) ---
+        # Calculates % of scores greater than or equal to 0.8
+        success_rate = np.mean([s >= 0.8 for s in gemini_mbe_list])
+
+        print(f"Data Source: {data_source}")
+        print(f"  - Avg Gemini MBE: {avg_score:.4f}")
+        print(f"  - Success Rate (>=0.8): {success_rate:.2%}")
+
+    # --- Metric 25 (Coverage Rate) ---
+    # Checks output_lst for your specific failure string
+    coverage = np.mean(["I have performed research but I can not find the answer" not in ans for ans in output_lst])
+    print(f"\nGlobal Coverage Rate: {coverage:.2%}")
 
 if __name__ == "__main__":
     main()

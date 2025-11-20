@@ -422,6 +422,9 @@ class BaseDeepResearchAgent(ABC):
         self._seen_queries = set()  # Track searched queries to prevent duplicate searches
         self._seen_urls = set()     # Track read URLs to prevent duplicate reads
         
+        # Tool call statistics - tracks success/failure rates for debugging and insights
+        self._tool_call_stats = {"total": 0, "success": 0, "failed": 0, "by_tool": {}}
+        
         for tool_name, tool in self.tools.items():
             instance_id, _ = await tool.create(
                 create_kwargs={
@@ -506,6 +509,14 @@ class BaseDeepResearchAgent(ABC):
 
         try:
             tool_response, _, _ = await tool.execute(instance_id, tool_args)
+            
+            # Track successful tool call
+            self._tool_call_stats["total"] += 1
+            self._tool_call_stats["success"] += 1
+            self._tool_call_stats["by_tool"][tool_name] = self._tool_call_stats["by_tool"].get(
+                tool_name, {"success": 0, "failed": 0}
+            )
+            self._tool_call_stats["by_tool"][tool_name]["success"] += 1
 
             # Truncate response if too long
             if (
@@ -519,6 +530,22 @@ class BaseDeepResearchAgent(ABC):
 
             return tool_response
         except Exception as e:
+            # Track failed tool call with statistics
+            self._tool_call_stats["total"] += 1
+            self._tool_call_stats["failed"] += 1
+            self._tool_call_stats["by_tool"][tool_name] = self._tool_call_stats["by_tool"].get(
+                tool_name, {"success": 0, "failed": 0}
+            )
+            self._tool_call_stats["by_tool"][tool_name]["failed"] += 1
+            success_rate = (
+                (self._tool_call_stats["success"] / self._tool_call_stats["total"] * 100)
+                if self._tool_call_stats["total"] > 0
+                else 0
+            )
+            logger.warning(
+                f"Tool call failed: {tool_name} | Session success rate: {success_rate:.1f}% "
+                f"({self._tool_call_stats['success']}/{self._tool_call_stats['total']})"
+            )
             return ToolResponse(
                 text=f"Error executing tool: {type(e).__name__}: {str(e)}"
             )

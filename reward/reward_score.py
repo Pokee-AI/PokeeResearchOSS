@@ -734,7 +734,8 @@ async def call_llm_with_retry_async(
     prompt,
     system_instruction,
     max_retries,
-) -> Tuple[float, str]:
+) -> Tuple[Optional[float], str]:
+    """Return a judged score, or None when no valid judgement was obtained."""
     func_name = getattr(llm_call_func, "__name__", "llm_call")
     for try_cnt in range(max_retries + 1):
         judgement = None
@@ -748,7 +749,7 @@ async def call_llm_with_retry_async(
                         f"[Error] when calling {func_name}: attempt {try_cnt + 1}/{max_retries + 1}, judgement is {judgement}"
                     )
                     return (
-                        0.0,
+                        None,
                         f"Failed to obtain LLMJudgement after {max_retries + 1} attempts",
                     )
                 retry_delay = get_retry_delay(try_cnt, error_str)
@@ -767,7 +768,7 @@ async def call_llm_with_retry_async(
                     f"[Error] when calling {func_name}: attempt {try_cnt + 1}/{max_retries + 1} error: {e}"
                 )
                 return (
-                    0.0,
+                    None,
                     f"Failed to obtain LLMJudgement after {max_retries + 1} attempts: {e}",
                 )
             retry_delay = get_retry_delay(try_cnt, str(e))
@@ -778,7 +779,7 @@ async def call_llm_with_retry_async(
             await asyncio.sleep(retry_delay)
 
     # This should never be reached, but just in case
-    return 0.0, "Unexpected end of retry loop"
+    return None, "Unexpected end of retry loop"
 
 
 async def gemini_mbe_score_async(
@@ -821,6 +822,11 @@ async def gemini_mbe_score_async(
         system_instruction=SYSTEM_INSTRUCTION,
         max_retries=3,
     )
+
+    # Preserve the zero-score fallback without caching a failed judge request.
+    # A later evaluation can retry; genuine incorrect judgements remain cached.
+    if score is None:
+        return 0.0
 
     # Cache the result
     set_cached_score(question, answer, score, ground_truth)

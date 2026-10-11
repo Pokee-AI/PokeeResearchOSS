@@ -184,6 +184,14 @@ class BaseDeepResearchAgent(ABC):
             r"<verification_result>(.*?)</verification_result>", re.DOTALL
         )
 
+    def _parse_tool_call(self, tool_call_str: str):
+        """Use the same JSON repair for validation, execution, and stream updates."""
+        try:
+            return json.loads(tool_call_str)
+        except json.JSONDecodeError:
+            # Small models may leave backslashes in search queries unescaped.
+            return json.loads(tool_call_str.replace("\\", "\\\\"))
+
     def _check_tool_call_format(
         self, tool_call_str: str
     ) -> Tuple[bool, Optional[ToolResponse]]:
@@ -205,16 +213,11 @@ class BaseDeepResearchAgent(ABC):
         """
         # Parse tool call JSON
         try:
-            tool_call = json.loads(tool_call_str)
+            tool_call = self._parse_tool_call(tool_call_str)
         except json.JSONDecodeError:
-            # Try escaping backslashes for common JSON errors
-            tool_call_escaped = tool_call_str.replace("\\", "\\\\")
-            try:
-                tool_call = json.loads(tool_call_escaped)
-            except json.JSONDecodeError:
-                return False, ToolResponse(
-                    text=f"Error: Invalid JSON in tool call: {tool_call_str}"
-                )
+            return False, ToolResponse(
+                text=f"Error: Invalid JSON in tool call: {tool_call_str}"
+            )
 
         # Validate tool call structure
         if (
@@ -451,7 +454,7 @@ class BaseDeepResearchAgent(ABC):
         Returns:
             ToolResponse with text result and optional artifacts
         """
-        tool_call = json.loads(tool_call_str)
+        tool_call = self._parse_tool_call(tool_call_str)
         tool_name = tool_call["name"]
         tool_args = tool_call["arguments"]
 
@@ -699,7 +702,7 @@ class BaseDeepResearchAgent(ABC):
                         tool_call_str
                     )
                     if is_valid:
-                        tool_call = json.loads(tool_call_str)
+                        tool_call = self._parse_tool_call(tool_call_str)
                         tool_name = tool_call["name"]
                         tool_args = tool_call["arguments"]
 
